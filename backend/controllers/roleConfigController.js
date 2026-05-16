@@ -1,106 +1,49 @@
 const asyncHandler = require('../utils/asyncHandler');
-const RoleConfig = require('../models/RoleConfig');
+const roleConfigService = require('../services/roleConfigService');
 
-// @desc    Get role config by role name
-// @route   GET /api/role-configs/:roleName
-// @access  Private
 const getRoleConfig = asyncHandler(async (req, res) => {
-  const { roleName } = req.params;
-  const config = await RoleConfig.findOne({ roleName });
-
-  if (!config) {
-    res.status(404);
-    throw new Error(`Configuration for role '${roleName}' not found`);
+  try {
+    const data = await roleConfigService.getRoleConfig(req.params.roleName);
+    res.status(200).json({ success: true, message: 'Role config fetched', data });
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
-
-  res.status(200).json({
-    status: 'success',
-    data: config,
-  });
 });
 
-// @desc    Get all role configs
-// @route   GET /api/role-configs
-// @access  Private/Admin
 const getAllRoleConfigs = asyncHandler(async (req, res) => {
-  const configs = await RoleConfig.find({});
-  res.status(200).json({
-    status: 'success',
-    count: configs.length,
-    data: configs,
-  });
+  const data = await roleConfigService.getAllRoleConfigs();
+  res.status(200).json({ success: true, message: 'Role configs fetched', data });
 });
 
-// @desc    Create role config
-// @route   POST /api/role-configs
-// @access  Private/Admin
 const createRoleConfig = asyncHandler(async (req, res) => {
-  const { roleName, fields } = req.body;
-
-  if (!roleName || !fields || !Array.isArray(fields)) {
-    res.status(400);
-    throw new Error('Please provide roleName and a fields array');
+  try {
+    const data = await roleConfigService.createRoleConfig(req.body);
+    res.status(201).json({ success: true, message: 'Role config created', data });
+  } catch (error) {
+    res.status(error.statusCode || 400);
+    throw error;
   }
-
-  const existingConfig = await RoleConfig.findOne({ roleName });
-  if (existingConfig) {
-    res.status(400);
-    throw new Error(`Configuration for role '${roleName}' already exists`);
-  }
-
-  const config = await RoleConfig.create({
-    roleName,
-    fields,
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: config,
-  });
 });
 
-// @desc    Update role config
-// @route   PUT /api/role-configs/:roleName
-// @access  Private/Admin
 const updateRoleConfig = asyncHandler(async (req, res) => {
-  const { roleName } = req.params;
-
-  let config = await RoleConfig.findOne({ roleName });
-
-  if (!config) {
-    res.status(404);
-    throw new Error(`Configuration for role '${roleName}' not found`);
+  try {
+    const data = await roleConfigService.updateRoleConfig(req.params.roleName, req.body);
+    res.status(200).json({ success: true, message: 'Role config updated', data });
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
-
-  config = await RoleConfig.findOneAndUpdate({ roleName }, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: config,
-  });
 });
 
-// @desc    Delete role config
-// @route   DELETE /api/role-configs/:roleName
-// @access  Private/Admin
 const deleteRoleConfig = asyncHandler(async (req, res) => {
-  const { roleName } = req.params;
-  const config = await RoleConfig.findOne({ roleName });
-
-  if (!config) {
-    res.status(404);
-    throw new Error(`Configuration for role '${roleName}' not found`);
+  try {
+    const data = await roleConfigService.deleteRoleConfig(req.params.roleName);
+    res.status(200).json({ success: true, message: 'Role config deleted', data });
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
-
-  await config.deleteOne();
-
-  res.status(200).json({
-    status: 'success',
-    message: `Configuration for role '${roleName}' deleted successfully`,
-  });
 });
 
 module.exports = {

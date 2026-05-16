@@ -1,67 +1,24 @@
 const asyncHandler = require('../utils/asyncHandler');
-const Report = require('../models/Report');
+const reportService = require('../services/reportService');
 
-// @desc    Submit weekly report
-// @route   POST /api/reports
-// @access  Private
 const submitReport = asyncHandler(async (req, res) => {
-  const { week, data } = req.body;
-
-  if (!week || !data) {
-    res.status(400);
-    throw new Error('Please provide week and data');
+  try {
+    const data = await reportService.submitReport(req.user._id, req.user.role, req.body);
+    res.status(201).json({ success: true, message: 'Report submitted successfully', data });
+  } catch (error) {
+    res.status(error.statusCode || 400);
+    throw error;
   }
-
-  // Ensure one report per week per employee
-  const existingReport = await Report.findOne({ userId: req.user._id, week });
-
-  if (existingReport) {
-    res.status(400);
-    throw new Error(`You have already submitted a report for week ${week}`);
-  }
-
-  const report = await Report.create({
-    userId: req.user._id,
-    role: req.user.role,
-    week,
-    data,
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: report,
-  });
 });
 
-// @desc    Get my reports
-// @route   GET /api/reports/my-reports
-// @access  Private
 const getMyReports = asyncHandler(async (req, res) => {
-  const reports = await Report.find({ userId: req.user._id }).sort({
-    submittedAt: -1,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    count: reports.length,
-    data: reports,
-  });
+  const data = await reportService.getMyReports(req.user._id);
+  res.status(200).json({ success: true, message: 'Reports fetched', data });
 });
 
-// @desc    Get all reports (Admin only)
-// @route   GET /api/reports
-// @access  Private/Admin
 const getAllReports = asyncHandler(async (req, res) => {
-  // Populate the userId to return name and email of the submitter
-  const reports = await Report.find({})
-    .populate('userId', 'name email branchId')
-    .sort({ submittedAt: -1 });
-
-  res.status(200).json({
-    status: 'success',
-    count: reports.length,
-    data: reports,
-  });
+  const data = await reportService.getAllReports();
+  res.status(200).json({ success: true, message: 'All reports fetched', data });
 });
 
 module.exports = {

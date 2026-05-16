@@ -1,86 +1,55 @@
 const asyncHandler = require('../utils/asyncHandler');
-const Branch = require('../models/Branch');
+const branchService = require('../services/branchService');
 
-// @desc    Get all branches
-// @route   GET /api/branches
-// @access  Private
 const getBranches = asyncHandler(async (req, res) => {
-  const branches = await Branch.find({});
+  const data = await branchService.getBranches();
   res.status(200).json({
-    status: 'success',
-    count: branches.length,
-    data: branches,
+    success: true,
+    message: 'Branches retrieved successfully',
+    data,
   });
 });
 
-// @desc    Create new branch
-// @route   POST /api/branches
-// @access  Private/Admin
 const createBranch = asyncHandler(async (req, res) => {
-  const { name, location } = req.body;
-
-  if (!name || !location) {
-    res.status(400);
-    throw new Error('Please provide all required fields: name, location');
+  try {
+    const data = await branchService.createBranch(req.body);
+    res.status(201).json({
+      success: true,
+      message: 'Branch created successfully',
+      data,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 400);
+    throw error;
   }
-
-  const branchExists = await Branch.findOne({ name });
-  if (branchExists) {
-    res.status(400);
-    throw new Error('Branch with this name already exists');
-  }
-
-  const branch = await Branch.create({
-    name,
-    location,
-  });
-
-  res.status(201).json({
-    status: 'success',
-    data: branch,
-  });
 });
 
-// @desc    Update branch
-// @route   PUT /api/branches/:id
-// @access  Private/Admin
 const updateBranch = asyncHandler(async (req, res) => {
-  let branch = await Branch.findById(req.params.id);
-
-  if (!branch) {
-    res.status(404);
-    throw new Error('Branch not found');
+  try {
+    const data = await branchService.updateBranch(req.params.id, req.body);
+    res.status(200).json({
+      success: true,
+      message: 'Branch updated successfully',
+      data,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
-
-  branch = await Branch.findByIdAndUpdate(req.params.id, req.body, {
-    new: true,
-    runValidators: true,
-  });
-
-  res.status(200).json({
-    status: 'success',
-    data: branch,
-  });
 });
 
-// @desc    Delete branch
-// @route   DELETE /api/branches/:id
-// @access  Private/Admin
 const deleteBranch = asyncHandler(async (req, res) => {
-  const branch = await Branch.findById(req.params.id);
-
-  if (!branch) {
-    res.status(404);
-    throw new Error('Branch not found');
+  try {
+    const data = await branchService.deleteBranch(req.params.id);
+    res.status(200).json({
+      success: true,
+      message: 'Branch deleted successfully',
+      data,
+    });
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
-
-  await branch.deleteOne();
-
-  res.status(200).json({
-    status: 'success',
-    message: 'Branch deleted successfully',
-    id: req.params.id,
-  });
 });
 
 module.exports = {

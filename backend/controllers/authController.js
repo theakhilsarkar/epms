@@ -1,47 +1,20 @@
 const asyncHandler = require('../utils/asyncHandler');
-const User = require('../models/User');
-const generateToken = require('../utils/generateToken');
+const authService = require('../services/authService');
 
 // @desc    Register a new user
 // @route   POST /api/auth/register
-// @access  Public (Can be restricted later if needed)
+// @access  Public
 const registerUser = asyncHandler(async (req, res) => {
-  const { name, email, password, role, branchId } = req.body;
-
-  // Check if user exists
-  const userExists = await User.findOne({ email });
-
-  if (userExists) {
-    res.status(400);
-    throw new Error('User already exists');
-  }
-
-  // Set isAdmin based on role
-  const isAdmin = role === 'admin';
-
-  // Create user
-  const user = await User.create({
-    name,
-    email,
-    password,
-    role: role || 'counselor',
-    branchId,
-    isAdmin,
-  });
-
-  if (user) {
+  try {
+    const data = await authService.registerUser(req.body);
     res.status(201).json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      branchId: user.branchId,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
+      success: true,
+      message: 'User registered successfully',
+      data,
     });
-  } else {
-    res.status(400);
-    throw new Error('Invalid user data');
+  } catch (error) {
+    res.status(error.statusCode || 400);
+    throw error;
   }
 });
 
@@ -49,24 +22,16 @@ const registerUser = asyncHandler(async (req, res) => {
 // @route   POST /api/auth/login
 // @access  Public
 const authUser = asyncHandler(async (req, res) => {
-  const { email, password } = req.body;
-
-  // Find user and explicitly select password since it has select: false in schema
-  const user = await User.findOne({ email }).select('+password');
-
-  if (user && (await user.matchPassword(password))) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      branchId: user.branchId,
-      isAdmin: user.isAdmin,
-      token: generateToken(user._id),
+  try {
+    const data = await authService.authUser(req.body.email, req.body.password);
+    res.status(200).json({
+      success: true,
+      message: 'User authenticated successfully',
+      data,
     });
-  } else {
-    res.status(401);
-    throw new Error('Invalid email or password');
+  } catch (error) {
+    res.status(error.statusCode || 401);
+    throw error;
   }
 });
 
@@ -74,21 +39,16 @@ const authUser = asyncHandler(async (req, res) => {
 // @route   GET /api/auth/profile
 // @access  Private
 const getProfile = asyncHandler(async (req, res) => {
-  // req.user is set in protect middleware
-  const user = await User.findById(req.user._id);
-
-  if (user) {
-    res.json({
-      _id: user._id,
-      name: user.name,
-      email: user.email,
-      role: user.role,
-      branchId: user.branchId,
-      isAdmin: user.isAdmin,
+  try {
+    const data = await authService.getProfile(req.user._id);
+    res.status(200).json({
+      success: true,
+      message: 'Profile fetched successfully',
+      data,
     });
-  } else {
-    res.status(404);
-    throw new Error('User not found');
+  } catch (error) {
+    res.status(error.statusCode || 404);
+    throw error;
   }
 });
 

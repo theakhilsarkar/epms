@@ -10,10 +10,9 @@ const validateRequest = (req, res, next) => {
     }));
 
     return res.status(400).json({
-      status: 'error',
-      statusCode: 400,
+      success: false,
       message: 'Validation failed',
-      errors: formattedErrors,
+      data: { errors: formattedErrors },
     });
   }
   next();
