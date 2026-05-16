@@ -69,7 +69,7 @@ export default function EmployeeDashboardPage() {
             Welcome back, {user?.name?.split(' ')[0]} 👋
           </h1>
           <p className="text-sm text-slate-500 mt-1">
-            Here's your performance summary for this week.
+            Here&apos;s your performance summary for this week.
           </p>
         </div>
         <Link

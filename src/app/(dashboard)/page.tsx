@@ -4,6 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/context/AuthContext';
 
+// eslint-disable-next-line react/no-unescaped-entities
 export default function RootPage() {
   const { user, loading } = useAuth();
   const router = useRouter();
