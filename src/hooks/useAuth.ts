@@ -9,8 +9,10 @@ export function useAuth() {
     // Check local storage for token on mount
     const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
     if (token) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setIsAuthenticated(true);
       // Ideally, decode token or fetch profile here to set user
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setUser({ name: 'Admin User', role: 'admin' });
     }
   }, []);

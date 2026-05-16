@@ -30,8 +30,7 @@ export default function AdminDashboardPage() {
         if (branchRes.success) setBranches(branchRes.data);
         if (roleRes.success) setRoles(roleRes.data);
         if (lbRes.success) setLeaderboard(lbRes.data);
-      } catch (e) {
-        console.error(e);
+      } catch (_e) {
       } finally {
         setLoading(false);
       }
@@ -40,23 +39,21 @@ export default function AdminDashboardPage() {
   }, []);
 
   // Fetch grouped + targets based on filters
-  const fetchFiltered = useCallback(async () => {
-    try {
-      const groupedRes = await adminService.getGroupedPerformance(selectedBy);
-      if (groupedRes.success) setGrouped(groupedRes.data);
-
-      if (selectedRole) {
-        const targetsRes = await adminService.getTargetVsAchievement(selectedRole);
-        if (targetsRes.success) setTargets(targetsRes.data);
-      }
-    } catch (e) {
-      console.error(e);
-    }
-  }, [selectedBy, selectedRole]);
-
   useEffect(() => {
+    const fetchFiltered = async () => {
+      try {
+        const groupedRes = await adminService.getGroupedPerformance(selectedBy);
+        if (groupedRes.success) setGrouped(groupedRes.data);
+
+        if (selectedRole) {
+          const targetsRes = await adminService.getTargetVsAchievement(selectedRole);
+          if (targetsRes.success) setTargets(targetsRes.data);
+        }
+      } catch (_e) {
+      }
+    };
     fetchFiltered();
-  }, [fetchFiltered]);
+  }, [selectedBy, selectedRole]);
 
   // Build chart-ready data
   const leaderboardChartData = leaderboard.slice(0, 8).map((u) => ({

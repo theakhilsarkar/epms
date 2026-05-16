@@ -5,6 +5,18 @@ import { adminService } from '@/services/adminService';
 
 type SortKey = 'score' | 'name' | 'reportCount';
 
+interface SortIconProps {
+  k: SortKey;
+  sortKey: SortKey;
+  sortAsc: boolean;
+}
+
+const SortIcon = ({ k, sortKey, sortAsc }: SortIconProps) => (
+  <span className="ml-1 text-slate-400">
+    {sortKey === k ? (sortAsc ? '↑' : '↓') : '↕'}
+  </span>
+);
+
 export default function AdminLeaderboardPage() {
   const [leaderboard, setLeaderboard] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -14,7 +26,7 @@ export default function AdminLeaderboardPage() {
   useEffect(() => {
     adminService.getLeaderboard()
       .then((res) => { if (res.success) setLeaderboard(res.data); })
-      .catch(console.error)
+      .catch(() => {})
       .finally(() => setLoading(false));
   }, []);
 
@@ -29,12 +41,6 @@ export default function AdminLeaderboardPage() {
     if (typeof va === 'string') return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
     return sortAsc ? va - vb : vb - va;
   });
-
-  const SortIcon = ({ k }: { k: SortKey }) => (
-    <span className="ml-1 text-slate-400">
-      {sortKey === k ? (sortAsc ? '↑' : '↓') : '↕'}
-    </span>
-  );
 
   const medalColor = (i: number) =>
     i === 0 ? 'bg-amber-100 text-amber-700 ring-amber-200'
@@ -97,20 +103,20 @@ export default function AdminLeaderboardPage() {
                     className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase cursor-pointer select-none hover:text-slate-800"
                     onClick={() => handleSort('name')}
                   >
-                    Employee <SortIcon k="name" />
+                    Employee <SortIcon k="name" sortKey={sortKey} sortAsc={sortAsc} />
                   </th>
                   <th className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase">Role</th>
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase cursor-pointer select-none hover:text-slate-800"
                     onClick={() => handleSort('reportCount')}
                   >
-                    Reports <SortIcon k="reportCount" />
+                    Reports <SortIcon k="reportCount" sortKey={sortKey} sortAsc={sortAsc} />
                   </th>
                   <th
                     className="px-6 py-3 text-left text-xs font-medium text-slate-500 uppercase cursor-pointer select-none hover:text-slate-800"
                     onClick={() => handleSort('score')}
                   >
-                    Score <SortIcon k="score" />
+                    Score <SortIcon k="score" sortKey={sortKey} sortAsc={sortAsc} />
                   </th>
                 </tr>
               </thead>

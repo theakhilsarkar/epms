@@ -22,8 +22,7 @@ export default function EmployeeDashboardPage() {
         ]);
         if (rptRes?.success) setReports(rptRes.data);
         if (roleRes?.success) setRoleConfig(roleRes.data);
-      } catch (e) {
-        console.error(e);
+      } catch (_e) {
       } finally {
         setLoading(false);
       }

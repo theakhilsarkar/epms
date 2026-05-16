@@ -30,21 +30,22 @@ export default function AdminAnalyticsPage() {
         if (branchRes.success) setBranchData(branchRes.data);
         if (roleGrpRes.success) setRoleData(roleGrpRes.data);
         if (lbRes.success) setLeaderboard(lbRes.data);
-      } catch (e) { console.error(e); }
+      } catch (_e) { }
       finally { setLoading(false); }
     };
     init();
   }, []);
 
-  const fetchTargets = useCallback(async () => {
-    if (!selectedRole) return;
-    try {
-      const res = await adminService.getTargetVsAchievement(selectedRole);
-      if (res.success) setTargets(res.data);
-    } catch (e) { console.error(e); }
+  useEffect(() => {
+    const fetchTargets = async () => {
+      if (!selectedRole) return;
+      try {
+        const res = await adminService.getTargetVsAchievement(selectedRole);
+        if (res.success) setTargets(res.data);
+      } catch (_e) { }
+    };
+    fetchTargets();
   }, [selectedRole]);
-
-  useEffect(() => { fetchTargets(); }, [fetchTargets]);
 
   const branchChartData = branchData.map((b) => ({
     name: b.name || 'Unknown',

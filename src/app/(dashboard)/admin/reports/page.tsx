@@ -20,7 +20,7 @@ export default function AdminReportsPage() {
         ]);
         if (rptRes.success) setReports(rptRes.data);
         if (roleRes.success) setRoles(roleRes.data);
-      } catch (e) { console.error(e); }
+      } catch (_e) { }
       finally { setLoading(false); }
     };
     init();

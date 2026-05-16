@@ -23,6 +23,9 @@ const app = express();
 
 // Security Headers
 app.use(helmet());
+app.use(cors({
+  origin: "https://epms.vercel.app"
+}));
 
 // Request Logging
 if (process.env.NODE_ENV === 'development') {

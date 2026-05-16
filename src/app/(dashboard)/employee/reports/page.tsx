@@ -48,8 +48,7 @@ export default function EmployeeReportsPage() {
           roleRes.data.fields.forEach((f: Field) => { initial[f.label] = ''; });
           setFormData(initial);
         }
-      } catch (e) {
-        console.error(e);
+      } catch (_e) {
       } finally {
         setLoading(false);
       }

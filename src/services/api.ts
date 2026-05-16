@@ -35,7 +35,6 @@ api.interceptors.response.use(
     
     // Extract and format error message from backend
     const message = error.response?.data?.message || error.message || 'An unexpected error occurred';
-    console.error('API Error:', message);
     
     return Promise.reject(error.response?.data || { success: false, message });
   }

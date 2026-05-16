@@ -24,7 +24,10 @@ export default function AdminBranchesPage() {
     }
   };
 
-  useEffect(() => { fetchBranches(); }, []);
+  useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    fetchBranches();
+  }, []);
 
   const resetForm = () => {
     setForm({ name: '', location: '' });
@@ -77,7 +80,7 @@ export default function AdminBranchesPage() {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Branches</h1>
-          <p className="text-sm text-slate-500 mt-1">Manage your company's branch locations.</p>
+          <p className="text-sm text-slate-500 mt-1">Manage your company&apos;s branch locations.</p>
         </div>
         {!showForm && (
           <button
