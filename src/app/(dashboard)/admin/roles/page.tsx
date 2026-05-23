@@ -7,6 +7,7 @@ interface Field {
   label: string;
   type: 'text' | 'number' | 'date';
   target?: number | string;
+  isTarget?: boolean;
 }
 
 interface RoleConfig {
@@ -15,7 +16,7 @@ interface RoleConfig {
   fields: Field[];
 }
 
-const emptyField = (): Field => ({ label: '', type: 'number', target: '' });
+const emptyField = (): Field => ({ label: '', type: 'number', target: '', isTarget: true });
 
 export default function AdminRolesPage() {
   const [configs, setConfigs] = useState<RoleConfig[]>([]);
@@ -56,7 +57,11 @@ export default function AdminRolesPage() {
   const startEdit = (config: RoleConfig) => {
     setForm({
       roleName: config.roleName,
-      fields: config.fields.map((f) => ({ ...f, target: f.target ?? '' })),
+      fields: config.fields.map((f) => ({
+        ...f,
+        target: f.target ?? '',
+        isTarget: f.target !== undefined && f.target !== null && f.target !== '',
+      })),
     });
     setEditingRole(config.roleName);
     setShowCreateForm(false);
@@ -84,8 +89,9 @@ export default function AdminRolesPage() {
     const payload = {
       roleName: form.roleName,
       fields: form.fields.map((f) => ({
-        ...f,
-        target: f.target !== '' ? Number(f.target) : undefined,
+        label: f.label,
+        type: f.type,
+        target: f.isTarget && f.target !== '' ? Number(f.target) : undefined,
       })),
     };
 
@@ -197,9 +203,10 @@ export default function AdminRolesPage() {
               <div className="flex flex-col gap-3">
                 {/* Column headers */}
                 <div className="grid grid-cols-12 gap-3 px-1">
-                  <span className="col-span-5 text-xs font-medium text-slate-500 uppercase tracking-wide">Label</span>
+                  <span className="col-span-4 text-xs font-medium text-slate-500 uppercase tracking-wide">Label</span>
                   <span className="col-span-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Type</span>
-                  <span className="col-span-3 text-xs font-medium text-slate-500 uppercase tracking-wide">Target</span>
+                  <span className="col-span-2 text-xs font-medium text-slate-500 uppercase tracking-wide text-center">Is Target?</span>
+                  <span className="col-span-2 text-xs font-medium text-slate-500 uppercase tracking-wide">Target</span>
                 </div>
 
                 {form.fields.map((field, idx) => (
@@ -210,23 +217,58 @@ export default function AdminRolesPage() {
                       value={field.label}
                       onChange={(e) => updateField(idx, 'label', e.target.value)}
                       placeholder="e.g. Calls Made"
-                      className="col-span-5 px-3 py-1.5 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      className="col-span-4 px-3 py-1.5 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     />
                     <select
                       value={field.type}
-                      onChange={(e) => updateField(idx, 'type', e.target.value)}
+                      onChange={(e) => {
+                        const newType = e.target.value as 'text' | 'number' | 'date';
+                        const isTarget = newType === 'number';
+                        setForm((f) => {
+                          const fields = [...f.fields];
+                          fields[idx] = { 
+                            ...fields[idx], 
+                            type: newType, 
+                            isTarget, 
+                            target: isTarget ? fields[idx].target : '' 
+                          };
+                          return { ...f, fields };
+                        });
+                      }}
                       className="col-span-3 px-3 py-1.5 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
                     >
                       <option value="number">Number</option>
                       <option value="text">Text</option>
                       <option value="date">Date</option>
                     </select>
+
+                    <div className="col-span-2 flex justify-center">
+                      <input
+                        type="checkbox"
+                        checked={!!field.isTarget}
+                        onChange={(e) => {
+                          const checked = e.target.checked;
+                          setForm((f) => {
+                            const fields = [...f.fields];
+                            fields[idx] = { 
+                              ...fields[idx], 
+                              isTarget: checked, 
+                              target: checked ? fields[idx].target : '' 
+                            };
+                            return { ...f, fields };
+                          });
+                        }}
+                        className="w-4 h-4 text-indigo-600 border-slate-300 rounded focus:ring-indigo-500 cursor-pointer"
+                      />
+                    </div>
+
                     <input
                       type="number"
+                      disabled={!field.isTarget}
                       value={field.target}
                       onChange={(e) => updateField(idx, 'target', e.target.value)}
-                      placeholder="—"
-                      className="col-span-3 px-3 py-1.5 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                      placeholder={field.isTarget ? "—" : "N/A"}
+                      className="col-span-2 px-3 py-1.5 border border-slate-200 rounded-md text-sm bg-white focus:outline-none focus:ring-2 focus:ring-indigo-400 disabled:bg-slate-100 disabled:text-slate-400 disabled:cursor-not-allowed"
                     />
                     <button
                       type="button"
